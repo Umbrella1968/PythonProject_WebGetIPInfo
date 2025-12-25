@@ -7,8 +7,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
-import get_client_ip
-import fetch_ipinfo
+from get_client_ip import get_client_ip
+from fetch_ipinfo import fetch_ipinfo
 
 # -------------------------
 # FastAPI app
