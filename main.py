@@ -37,6 +37,7 @@ class Visit(Base):
     user_agent = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now(), index=True)
     geo_info_region =Column(String, nullable=True)
+    geo_info_country =Column(String, nullable=True)
 
 
 Base.metadata.create_all(bind=engine)
@@ -57,7 +58,12 @@ def get_db():
 # -------------------------
 # Background task: save visit and get ipinfo
 # -------------------------
-def save_visit_to_db(ip: str, ua: str | None, dedup_seconds: int,geo_info: dict | None):
+def save_visit_to_db(
+        ip: str,
+        ua: str | None,
+        dedup_seconds: int,
+        geo_info: dict | None
+):
     """
     后台任务：保存访问记录（带去重逻辑）
     dedup_seconds: 同一个 IP 在多少秒内只记录一次
@@ -76,7 +82,18 @@ def save_visit_to_db(ip: str, ua: str | None, dedup_seconds: int,geo_info: dict 
                 # 已经记录过了 -> 不插入
                 return
 
-        db.add(Visit(ip=ip, user_agent=ua, created_at=datetime.now(),geo_info_region=geo_info.get("region")))
+        geo_country = geo_info.get("country") if isinstance(geo_info, dict) else None
+        geo_region = geo_info.get("region") if isinstance(geo_info, dict) else None
+        db.add(
+            Visit(
+                ip=ip,
+                user_agent=ua,
+                created_at=datetime.now(),
+                geo_info_region=geo_region,
+                geo_info_country=geo_country
+            )
+        )
+
         db.commit()
     finally:
         db.close()
